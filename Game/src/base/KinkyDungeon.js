@@ -2735,6 +2735,56 @@ function KinkyDungeonRun() {
 						XX += XXd;
 					}
 				});
+			} else {
+				let isModTab = false;
+				let tabModConfig = {};
+				let tabModID = "";
+
+				KDModConfigs.forEach((modConfig, modID) => {
+					if (KDToggleTab === "KDMod" + modID) {
+						tabModConfig = modConfig;
+						tabModID = modID;
+						isModTab = true;
+					}
+				})
+
+				if (isModTab) {
+					YY = YYstart;
+					YYd = 74;
+					tabModConfig.entries.forEach((/** @type {KDModConfigEntry} */ entry) => {
+						let elementAdded = false;
+
+						if (entry.entryType === "Button") {
+							DrawButtonKDEx("ModB" + tabModID + entry.id, () => {
+								if (entry.callback != null) {
+									entry.callback();
+								}
+								return true;
+							}, true, XX, YY, 300, 64, entry.label, entry.color != null ? entry.color : "#ffffff", "");
+							elementAdded = true;
+						} else if (entry.entryType === "Checkbox") {
+							DrawCheckboxKDEx("ModC" + tabModID + entry.id, () => {
+								let oldValue = KDGetModConfigEntryValue(tabModID, entry.id);
+								KDSetModConfigEntryValue(tabModID, entry.id, !oldValue);
+								return true;
+							}, true, XX, YY, 64, 64, entry.label, entry.value, false, "#ffffff", undefined, {
+								maxWidth: 350,
+								fontSize: 24,
+								scaleImage: true,
+							});
+							elementAdded = true;
+						}
+
+
+						if (elementAdded) {
+							YY += YYd;
+							if (YY > YYmax) {
+								YY = YYstart;
+								XX += XXd;
+							}
+						}
+					})
+				}
 			}
 			DrawButtonKDEx("KBBackOptions", () => {
 				KinkyDungeonKeybindingsTemp = Object.assign({}, KinkyDungeonKeybindingsTemp);

@@ -1,35 +1,14 @@
-type KDConfigEntryButton = {
-	label: string;
-	color: string;
-	callback: () => void;
-};
-
-type KDConfigEntryNumberSlider = {
-	label: string;
-	max: number;
-	min: number;
-	step: number;
-};
-
-type KDConfigEntryStringSlider = {
-	label: string;
-	values: string[];
-};
-
-type KDConfigEntryTextbox = {
-	label: string;
-	placeholder?: string;
-};
-
-type KDConfigEntryCheckbox = {
-	label: string;
-};
-
 type KDModConfigEntry = {
 	id: string
 	entryType: "Button" | "NumberSlider" | "StringSlider" | "Textbox" | "Checkbox";
-	entryConfig: KDConfigEntryCheckbox | KDConfigEntryTextbox | KDConfigEntryStringSlider | KDConfigEntryNumberSlider | KDConfigEntryButton;
-	value: any; // also used as defaultValue when adding a config
+	label: string;
+	value?: any;
+	values?: string[]; // StringSlider
+	max?: number; // NumberSlider
+	min?: number; // NumberSlider
+	step?: number; // NumberSlider
+	color?: string; // Button
+	callback?: () => void; // Button
 };
 
 type KDModConfig = {
@@ -54,16 +33,25 @@ function KDAddModConfig(modID: string, modConfig: KDModConfig) {
 	KDModConfigs.set(modID, modConfig);
 }
 
-// *Only gets used by Mods*
-function KDGetModConfigEntry(modID: string, optionID: string) {
+function KDGetModConfigEntryValue(modID: string, optionID: string) {
 	if (KDModConfigs.has(modID)) {
-		let configs = KDModConfigs.get(modID);
-		let entry = configs.entries.find((entry) => entry.id == optionID);
+		let config = KDModConfigs.get(modID);
+		let entry = config.entries.find((entry) => entry.id == optionID);
 		if (entry != null) {
 			return entry.value;
 		}
 	}
 	return null;
+}
+
+function KDSetModConfigEntryValue(modID: string, optionID: string, newValue: any) {
+	if (KDModConfigs.has(modID)) {
+		let config = KDModConfigs.get(modID);
+		let indexOfEntry = config.entries.findIndex((entry) => entry.id == optionID);
+		if (indexOfEntry != -1) {
+			config.entries[indexOfEntry].value = newValue;
+		}
+	}
 }
 
 async function KDGetModsLoad(execute) {
