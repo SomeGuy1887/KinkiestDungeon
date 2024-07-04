@@ -2721,8 +2721,8 @@ function KinkyDungeonRun() {
 
 				KDDrawPalettes(x, 250, w, scale);
 			} else if (KDToggleTab == "ModConfigs") {
-				YY = YYstart;
-				YYd = 74;
+				YY = YYstart + 20;
+				YYd = 84;
 				KDModConfigs.forEach((modConfig, modID) => {
 					DrawButtonKDEx("ModB" + modID, () => {
 						KDToggleTab = "KDMod" + modID;
@@ -2749,8 +2749,8 @@ function KinkyDungeonRun() {
 				})
 
 				if (isModTab) {
-					YY = YYstart;
-					YYd = 74;
+					YY = YYstart + 20;
+					YYd = 84;
 					tabModConfig.entries.forEach((/** @type {KDModConfigEntry} */ entry) => {
 						let elementAdded = false;
 
@@ -2763,23 +2763,40 @@ function KinkyDungeonRun() {
 							}, true, XX, YY, 300, 64, entry.label, entry.color != null ? entry.color : "#ffffff", "");
 							elementAdded = true;
 						} else if (entry.entryType === "Checkbox") {
+							// TODO: Fix bug where the checkbox is always true?
+							let curValue = KDGetModConfigEntryValue(tabModID, entry.id);
 							DrawCheckboxKDEx("ModC" + tabModID + entry.id, () => {
 								let oldValue = KDGetModConfigEntryValue(tabModID, entry.id);
 								KDSetModConfigEntryValue(tabModID, entry.id, !oldValue);
 								return true;
-							}, true, XX, YY, 64, 64, entry.label, entry.value, false, "#ffffff", undefined, {
+							}, true, XX, YY, 64, 64, entry.label, curValue, false, "#ffffff", undefined, {
 								maxWidth: 350,
 								fontSize: 24,
 								scaleImage: true,
 							});
 							elementAdded = true;
+						} else if (entry.entryType === "Textbox") {
+							// TODO: Add Maxlength as entry config
+							DrawTextFitKD(entry.label, XX + 55, YY + 5, 200, "#ffffff", KDTextGray0, 20);
+							let curValue = KDGetModConfigEntryValue(tabModID, entry.id);
+							let CF = KDTextField("ModT" + tabModID + entry.id, XX, YY + 24, 250, 35, undefined, curValue, "99");
+							if (CF.Created) {
+								CF.Element.oninput = (event) => {
+									let value = ElementValue("ModT" + tabModID + entry.id);
+									KDSetModConfigEntryValue(tabModID, entry.id, value);
+								};
+							}
+
+							elementAdded = true;
 						}
+
+
 
 
 						if (elementAdded) {
 							YY += YYd;
 							if (YY > YYmax) {
-								YY = YYstart;
+								YY = YYstart + 20;
 								XX += XXd;
 							}
 						}

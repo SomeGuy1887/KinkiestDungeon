@@ -1,12 +1,8 @@
 type KDModConfigEntry = {
 	id: string
-	entryType: "Button" | "NumberSlider" | "StringSlider" | "Textbox" | "Checkbox";
+	entryType: "Button" | "Textbox" | "Checkbox";
 	label: string;
-	value?: any;
-	values?: string[]; // StringSlider
-	max?: number; // NumberSlider
-	min?: number; // NumberSlider
-	step?: number; // NumberSlider
+	defaultValue?: any;
 	color?: string; // Button
 	callback?: () => void; // Button
 };
@@ -31,27 +27,42 @@ let KDOffline = false;
 // *Only gets used by Mods*
 function KDAddModConfig(modID: string, modConfig: KDModConfig) {
 	KDModConfigs.set(modID, modConfig);
+	modConfig.entries.forEach((entry) => {
+		let isEntryInLocalstorage = localStorage.getItem("KDMod_" + modID + "_" + entry.id) != null;
+
+		if (!isEntryInLocalstorage) {
+			localStorage.setItem("KDMod_" + modID + "_" + entry.id, entry.defaultValue);
+		}
+	})
 }
 
-function KDGetModConfigEntryValue(modID: string, optionID: string) {
+function KDGetModConfigEntryValue(modID: string, optionID: string): any {
+	let shouldConvert = false;
 	if (KDModConfigs.has(modID)) {
-		let config = KDModConfigs.get(modID);
-		let entry = config.entries.find((entry) => entry.id == optionID);
-		if (entry != null) {
-			return entry.value;
+		let modConfig = KDModConfigs.get(modID);
+
+		let entry = modConfig.entries.find((entry) => entry.id === modID);
+
+		if (entry && entry.entryType === "Checkbox") {
+			shouldConvert = true;
 		}
+	}
+	let entryValue = localStorage.getItem("KDMod_" + modID + "_" + optionID);
+
+	if (entryValue) {
+		if (shouldConvert && entryValue === "true") {
+			return true;
+		}
+		else if (shouldConvert && entryValue === "false") {
+			return false;
+		}
+		return entryValue;
 	}
 	return null;
 }
 
 function KDSetModConfigEntryValue(modID: string, optionID: string, newValue: any) {
-	if (KDModConfigs.has(modID)) {
-		let config = KDModConfigs.get(modID);
-		let indexOfEntry = config.entries.findIndex((entry) => entry.id == optionID);
-		if (indexOfEntry != -1) {
-			config.entries[indexOfEntry].value = newValue;
-		}
-	}
+	localStorage.setItem("KDMod_" + modID + "_" + optionID, newValue);
 }
 
 async function KDGetModsLoad(execute) {
