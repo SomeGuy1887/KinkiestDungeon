@@ -2549,6 +2549,14 @@ function KinkyDungeonRun() {
 		DrawButtonVis(1075, 650, 350, 64, TextGet("KinkyDungeonNewGamePlus"), "#ffffff", "");
 		DrawButtonVis(1075, 750, 350, 64, TextGet("GameReturnToMenu"), "#ffffff", "");
 	} else if (KinkyDungeonState == "Toggles") {
+		let configGroupAdded = KDToggleGroups.find((group) => group === "ModConfigs") != null;
+		if (KDModConfigs.size > 0 && !configGroupAdded) {
+			KDToggleGroups.push("ModConfigs");
+		}
+		else if (KDModConfigs.size === 0 && configGroupAdded) {
+			KDToggleGroups = KDToggleGroups.filter((group) => group !== "ModConfigs");
+		}
+
 		KDDrawToggleTabs(500);
 
 		if (KDToggleTab == "Keybindings") {
@@ -2712,6 +2720,21 @@ function KinkyDungeonRun() {
 
 
 				KDDrawPalettes(x, 250, w, scale);
+			} else if (KDToggleTab == "ModConfigs") {
+				YY = YYstart;
+				YYd = 74;
+				KDModConfigs.forEach((modConfig, modID) => {
+					DrawButtonKDEx("ModB" + modID, () => {
+						KDToggleTab = "KDMod" + modID;
+						return true;
+					}, true, XX, YY, 300, 64, modConfig.name, "#ffffff", "");
+
+					YY += YYd;
+					if (YY > YYmax) {
+						YY = YYstart;
+						XX += XXd;
+					}
+				});
 			}
 			DrawButtonKDEx("KBBackOptions", () => {
 				KinkyDungeonKeybindingsTemp = Object.assign({}, KinkyDungeonKeybindingsTemp);
